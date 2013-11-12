@@ -11,16 +11,18 @@ namespace Dlin\Zendesk\Client;
 
 
 use Dlin\Zendesk\Exception\ZendeskException;
+use Dlin\Zendesk\Result\CollectionResult;
 use Dlin\Zendesk\ZendeskApi;
 use Guzzle\Http\Message\RequestInterface;
 use Guzzle\Service\Client;
 
-class BaseClient
+abstract class BaseClient
 {
     /**
      * @var \Dlin\Zendesk\ZendeskApi
      */
     protected $api;
+
 
 
     /**
@@ -33,6 +35,12 @@ class BaseClient
     {
         $this->api = $api;
     }
+
+
+    abstract function getCollection( $end_point, $page=1, $per_page=100);
+    abstract function getOne($id);
+
+
 
     /**
      * Process request into a response object
@@ -79,7 +87,34 @@ class BaseClient
     }
 
 
+    public function getCollectionResult(BaseClient $client, $key,  $class, $values, $page=1, $per_page=100){
 
+
+        $result = new CollectionResult();
+        $result->setClient($client);
+
+        if(array_key_exists('count',$values)){
+            $result->setCount($values['count']);
+        }
+        if(array_key_exists('next_page',$values)){
+            $result->setNextPage($values['next_page']);
+        }
+        if(array_key_exists('previous_page',$values)){
+            $result->setPreviousPage($values['previous_page']);
+        }
+
+        $result->setCurrentPage($page);
+        $result->setPerPage($per_page);
+
+        if(array_key_exists($key, $values) && is_array($values[$key])){
+            foreach($values[$key] as $value){
+                $entity = new $class();
+                $result[] =  $entity->fromArray($value);
+            }
+        }
+        return $result;
+
+    }
 
 
 }

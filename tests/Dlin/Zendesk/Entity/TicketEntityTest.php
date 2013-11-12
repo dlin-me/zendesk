@@ -15,17 +15,10 @@ use Dlin\Zendesk\Enum\SatisfactionRatingScore;
 
 class TicketEntityTest extends \PHPUnit_Framework_TestCase
 {
-    public function testToArray()
-    {
-
-        //echo class_exists("\Dlin\Zendesk\Entity\SatisfactionRating") ? " yes": "no";exit;
 
 
 
-    }
-
-
-    public function testFromArray()
+    public function testFromToArray()
     {
 
         $data = <<<JSON
@@ -91,6 +84,29 @@ JSON;
         $this->assertEquals($satisfactionRating->getComment(), "Great support!");
         $this->assertNull($satisfactionRating->getGroupId());
 
+
+        $this->assertEquals('web', $ticket->getVia()->getChannel() );
+
+        $customFields = $ticket->getCustomFields();
+
+        $this->assertCount(2, $ticket->getTags());
+        $this->assertCount(1, $ticket->getSharingAgreementIds());
+        $this->assertCount(2, $customFields);
+
+        $this->assertEquals($customFields[0]->getId() ,27642 );
+        $this->assertEquals($customFields[0]->getValue() ,"745" );
+        $this->assertEquals($customFields[1]->getId() ,27648 );
+        $this->assertEquals($customFields[1]->getValue() ,"yes" );
+
+
+        $array = $ticket->toArray();
+
+
+
+        $this->assertEquals('https://company.zendesk.com/api/v2/tickets/35436.json', $array['url']);
+        $this->assertEquals('web', $array['via']['channel']);
+        $this->assertCount(2, $array['custom_fields']);
+        $this->assertEquals(27642, $array['custom_fields'][0]['id']);
 
 
 

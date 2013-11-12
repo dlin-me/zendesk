@@ -29,6 +29,30 @@ class ZendeskApi {
         return $this->client;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getApiToken()
+    {
+        return $this->apiToken;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getApiUrl()
+    {
+        return $this->apiUrl;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEmailAddress()
+    {
+        return $this->emailAddress;
+    }
+
 
     public function __construct($emailAddress, $apiToken, $apiUrl)
     {

@@ -13,17 +13,7 @@ namespace Dlin\Zendesk\Entity;
 abstract class BaseEntity
 {
 
-    /**
-     * Constructor
-     *
-     * @param array $data
-     */
-    public function __construct(array $data = null)
-    {
-        if ($data) {
-            $this->fromArray($data);
-        }
-    }
+
 
 
     /**
@@ -43,9 +33,9 @@ abstract class BaseEntity
 
                     foreach ($v as $sub) {
                         if (is_a($sub, 'Dlin\Zendesk\Entity\BaseEntity')) {
-                            $object[] = $sub->toArray();
+                            $subV[] = $sub->toArray();
                         } else {
-                            $object[] = $sub;
+                            $subV[] = $sub;
                         }
                     }
                     $object[$k] = $subV;
@@ -69,7 +59,8 @@ abstract class BaseEntity
     public function fromArray(array $array)
     {
         foreach ($array as $k => $v) {
-            if (property_exists(get_class($this), $k)) {
+
+            if (!is_null($v) && property_exists(get_class($this), $k)) {
 
                 $meta = new \ReflectionProperty(get_class($this), $k);
 
@@ -77,26 +68,31 @@ abstract class BaseEntity
 
                 $type =$info['type'];
 
-                if(strtolower($type) == "array"){
-                    $elementType = $info['element'];
+                if(strtolower($type) == "array" && $elementType = $info['array_element']){
+                    if(class_exists($elementType)){
+                        $children = array();
+                        foreach($v as $subV){
+                            $newElement = new $elementType();
+                            $children[] = $newElement->fromArray($subV);
+                        }
+                        $this->$k = $children;
+
+                    }else{
+                        throw new \Exception('@element Class Not Found:'.$elementType);
+                    }
 
                 }else if(class_exists($type)){
-                    $this->$k = new $type($v);
+                    $this->$k = (new $type())->fromArray($v);
                 }else{
                     $this->$k = $v;
                 }
 
-                /*
-                $setter = 'set' . ucfirst(preg_replace_callback('@_([a-z])@', function ($m) {
-                        return strtoupper($m[1]);
-                    }, $k));
-                if (method_exists($this, $setter)) {
-                    $this->$setter($v);
-                }
-                */
+
             }
 
         }
+
+        return $this;
     }
 
     /**

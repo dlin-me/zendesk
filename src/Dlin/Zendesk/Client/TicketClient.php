@@ -15,34 +15,24 @@ use Dlin\Zendesk\Entity\Ticket;
 class TicketClient extends BaseClient
 {
 
-
-    public function getCollection( $end_point, $page=1, $per_page=100)
-    {
-        $end_point = strtolower($end_point);
-        if(strpos($end_point, 'http') !== 0){
-            $end_point = $this->api->getApiUrl().$end_point;
-        }
-
-        $request = $this->api->getClient()->get($end_point);
-        $request->getQuery()->set('page', $page)->set('per_page', $per_page);
-        $response = $this->processRequest($request);
-        $results = $response->json();
-       return  $this->getCollectionResult($this, 'tickets', '\Dlin\Zendesk\Entity\Ticket', $results, $page, $per_page);
-
+    /**
+     * Return entity class type.
+     *
+     * @return string
+     */
+    public function getType(){
+        return '\Dlin\Zendesk\Entity\Ticket';
     }
 
 
-    public function getOne($id){
-        $request = $this->api->getClient()->get($this->api->getApiUrl()."tickets/$id.json");
-        $response = $this->processRequest($request);
-        $result = $response->json();
+    public function getOneById($id){
+        return $this->getOne("tickets/$id.json");
+    }
 
 
-        if($result && isset($result['ticket'])){
-            $t = new Ticket();
-            return $t->fromArray($result['ticket']);
-        }
-        return null;
+    public function getMultiple(array $ids, $page=1, $per_page=100){
+
+        return $this->getCollection('tickets/show_many.json?ids='.implode(',',$ids), $page, $per_page);
     }
 
 
@@ -68,6 +58,19 @@ class TicketClient extends BaseClient
         return $this->getCollection("users/$user_id/tickets/ccd.json", $page, $per_page);
     }
 
+
+    public function searchTickets(array $query, $page=1, $per_page=100, $sort_by=null, $sort_order='asc'){
+        $query['type'] = 'ticket';
+        $searchTerms = array();
+        foreach($query as $k=>$v){
+            if(strpos($v, ' ')){
+                $v = '"'.addcslashes($v, '"').'"';
+            }
+            $searchTerms[]="$k:$v";
+        }
+
+        return $this->getCollection('tickets/show_many.json?ids='.implode(',',$ids), $page, $per_page);
+    }
 
 
 }

@@ -26,10 +26,10 @@ class TicketClientTest extends \PHPUnit_Framework_TestCase {
         $this->client = new TicketClient($api);
     }
 
-    public function testList()
+    public function testGet()
     {
 
-
+        //all tickets
         $resultSet = $this->client->getAllTickets(1,1);
         $this->assertGreaterThan(0, $resultSet->getCount() );
         $this->assertNull($resultSet->getPreviousPage());
@@ -42,16 +42,15 @@ class TicketClientTest extends \PHPUnit_Framework_TestCase {
          */
         $ticket = $resultSet ? $resultSet[0] : null;
 
+        //One ticket
         if($ticket){
-            $oneTicket = $this->client->getOne($ticket->getId());
-
+            $oneTicket = $this->client->getOneById($ticket->getId());
             $this->assertEquals($ticket->getId(), $oneTicket->getId());
             $this->assertEquals($ticket->getDescription(), $oneTicket->getDescription());
         }
 
+        //Test result set next and prev
         $nextResultSet = $resultSet->getNextResult();
-
-
 
         $this->assertEquals($resultSet->getCount(), $nextResultSet->getCount() );
         $this->assertNotNull($nextResultSet->getPreviousPage());
@@ -72,14 +71,18 @@ class TicketClientTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertEquals($prevTicket->getId(), $ticket->getId());
 
+        //recent tickets
+        $twoTicketIds = array($ticket->getId(), $nextTicket->getId());
+        $this->assertCount(2, $twoTicketIds);
 
+        $result = $this->client->getMultiple($twoTicketIds);
+
+        $this->assertCount(2, $result);
+
+        print_r($result->getItems());
 
     }
 
-    public function testOne(){
-        $result = $this->client->getOne(140);
-        $this->assertEquals(140, $result->getId());
 
-    }
 
 }

@@ -175,13 +175,17 @@ class CollectionResult implements \ArrayAccess, \Countable {
     /**
      * @param array $items
      */
-    public function setItems($items)
+    public function setItems(array $items)
     {
         $this->items = $items;
     }
 
-
-
+    /**
+     * @return array
+     */
+    public function getItems(){
+        return $this->items;
+    }
 
 //ArrayAccess Interface Implementation bellow
     public function offsetSet($offset, $value) {

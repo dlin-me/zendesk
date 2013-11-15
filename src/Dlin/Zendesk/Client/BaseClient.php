@@ -24,7 +24,6 @@ abstract class BaseClient
     protected $api;
 
 
-
     /**
      *
      * Constructor
@@ -37,9 +36,70 @@ abstract class BaseClient
     }
 
 
-    abstract function getCollection( $end_point, $page=1, $per_page=100);
-    abstract function getOne($id);
+    /**
+     * @return string
+     */
+    abstract public function getType();
 
+
+    /**
+     * Generic function for getting a collection of entities
+     *
+     * @param $end_point
+     * @param int $page
+     * @param int $per_page
+     * @param null $sort_by
+     * @param string $sort_order
+     * @return \Dlin\Zendesk\Result\CollectionResult
+     */
+    public function getCollection($end_point, $page = 1, $per_page = 100, $sort_by = null, $sort_order = 'asc')
+    {
+        $end_point = strtolower($end_point);
+        if (strpos($end_point, 'http') !== 0) {
+            $end_point = $this->api->getApiUrl() . $end_point;
+        }
+
+        $request = $this->api->getClient()->get($end_point);
+        $query = $request->getQuery()->set('page', $page)->set('per_page', $per_page)->set('sort_order', $sort_order == 'asc' ? 'asc' : 'desc');
+        if ($sort_by) {
+            $$query->set('sort_by', $sort_by);
+        }
+
+        $response = $this->processRequest($request);
+        $results = $response->json();
+
+        return $this->getCollectionResult($this, 'tickets', $this->getType(), $results, $page, $per_page);
+
+    }
+
+    /**
+     * Generic function for getting one entity
+     *
+     * @param $end_point
+     * @return null
+     */
+    protected  function getOne($end_point)
+    {
+
+        $end_point = strtolower($end_point);
+        if (strpos($end_point, 'http') !== 0) {
+            $end_point = $this->api->getApiUrl() . $end_point;
+        }
+
+
+        $request = $this->api->getClient()->get($end_point);
+        $response = $this->processRequest($request);
+        $result = $response->json();
+
+
+        if ($result && isset($result['ticket'])) {
+            $type = $this->getType();
+            $t = new $type();
+            return $t->fromArray($result['ticket']);
+        }
+        return null;
+
+    }
 
 
     /**
@@ -49,25 +109,26 @@ abstract class BaseClient
      * @return \Guzzle\Http\Message\Response
      * @throws \Dlin\Zendesk\Exception\ZendeskException
      */
-    public function processRequest(RequestInterface $request){
+    public function processRequest(RequestInterface $request)
+    {
         $response = $request->send();
         $attempt = 0;
-        while($response->getStatusCode() == 429 && $attempt < 5){
+        while ($response->getStatusCode() == 429 && $attempt < 5) {
             $wait = $response->getHeader('Retry-After');
-            if($wait > 0){
+            if ($wait > 0) {
                 sleep($wait);
             }
             $attempt++;
             $response = $request->send();
         }
 
-        if($response->getStatusCode() >= 500){
+        if ($response->getStatusCode() >= 500) {
             throw new ZendeskException('Zendesk Server Error Detected.');
         }
 
 
-        if($response->getStatusCode() >= 400){
-            if($response->getContentType() == 'application/json'){
+        if ($response->getStatusCode() >= 400) {
+            if ($response->getContentType() == 'application/json') {
                 $result = $response->json();
 
                 $description = array_key_exists($result, 'description') ? $result['description'] : 'Invalid Request';
@@ -78,7 +139,7 @@ abstract class BaseClient
 
                 throw $exception;
 
-            }else{
+            } else {
                 throw new ZendeskException('Invalid API Request');
             }
         }
@@ -87,29 +148,30 @@ abstract class BaseClient
     }
 
 
-    public function getCollectionResult(BaseClient $client, $key,  $class, $values, $page=1, $per_page=100){
+    public function getCollectionResult(BaseClient $client, $key, $class, $values, $page = 1, $per_page = 100)
+    {
 
 
         $result = new CollectionResult();
         $result->setClient($client);
 
-        if(array_key_exists('count',$values)){
+        if (array_key_exists('count', $values)) {
             $result->setCount($values['count']);
         }
-        if(array_key_exists('next_page',$values)){
+        if (array_key_exists('next_page', $values)) {
             $result->setNextPage($values['next_page']);
         }
-        if(array_key_exists('previous_page',$values)){
+        if (array_key_exists('previous_page', $values)) {
             $result->setPreviousPage($values['previous_page']);
         }
 
         $result->setCurrentPage($page);
         $result->setPerPage($per_page);
 
-        if(array_key_exists($key, $values) && is_array($values[$key])){
-            foreach($values[$key] as $value){
+        if (array_key_exists($key, $values) && is_array($values[$key])) {
+            foreach ($values[$key] as $value) {
                 $entity = new $class();
-                $result[] =  $entity->fromArray($value);
+                $result[] = $entity->fromArray($value);
             }
         }
         return $result;

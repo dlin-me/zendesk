@@ -10,11 +10,31 @@
 namespace Dlin\Zendesk\Entity;
 
 
+use Dlin\Zendesk\Enum\TicketPriority;
+use Dlin\Zendesk\Enum\TicketStatus;
+use Dlin\Zendesk\Enum\TicketType;
+
 class Ticket extends BaseEntity
 {
 
     const ISO8601_DATE = 'Y-m-d\TH:i:sP';
 
+
+    /**
+     * You can add up to 1 kilobyte of custom metadata upon Create or Update to Audi
+     * @var array
+     * @writeonly
+     *
+     */
+    protected $metadata;
+
+
+    /**
+     * @var TicketComment
+     * @writeonly
+     * @required
+     */
+    protected $comment;
 
     /**
      * Automatically assigned when creating tickets
@@ -48,6 +68,7 @@ class Ticket extends BaseEntity
     /**
      * The value of the subject field for this ticket
      * @var string
+     * @required
      */
     protected $subject;
 
@@ -62,7 +83,7 @@ class Ticket extends BaseEntity
     /**
      * Priority, defines the urgency with which the ticket should be addressed: "urgent", "high", "normal", "low"
      *
-     * @var string ("urgent", "high", "normal", "low")
+     * @var string
      * @see \Dlin\Zendesk\Enum\TicketPriority
      */
     protected $priority;
@@ -88,7 +109,7 @@ class Ticket extends BaseEntity
     /**
      * The user who requested this ticket
      * @var integer
-     * @required
+     * 
      */
     protected $requester_id;
 
@@ -216,27 +237,11 @@ class Ticket extends BaseEntity
     protected $updated_at;
 
     /**
-     * @param int $assignee_id
-     */
-    public function setAssigneeId($assignee_id)
-    {
-        $this->assignee_id = $assignee_id;
-    }
-
-    /**
      * @return int
      */
     public function getAssigneeId()
     {
         return $this->assignee_id;
-    }
-
-    /**
-     * @param array $collaborator_ids
-     */
-    public function setCollaboratorIds($collaborator_ids)
-    {
-        $this->collaborator_ids = $collaborator_ids;
     }
 
     /**
@@ -247,21 +252,12 @@ class Ticket extends BaseEntity
         return $this->collaborator_ids;
     }
 
-
     /**
      * @return string
      */
     public function getCreatedAt()
     {
         return $this->created_at;
-    }
-
-    /**
-     * @param array $custom_fields
-     */
-    public function setCustomFields($custom_fields)
-    {
-        $this->custom_fields = $custom_fields;
     }
 
     /**
@@ -272,21 +268,12 @@ class Ticket extends BaseEntity
         return $this->custom_fields;
     }
 
-
     /**
      * @return string
      */
     public function getDescription()
     {
         return $this->description;
-    }
-
-    /**
-     * @param string $due_at
-     */
-    public function setDueAt($due_at)
-    {
-        $this->due_at = $due_at;
     }
 
     /**
@@ -298,21 +285,12 @@ class Ticket extends BaseEntity
     }
 
     /**
-     * @param string $external_id
-     */
-    public function setExternalId($external_id)
-    {
-        $this->external_id = $external_id;
-    }
-
-    /**
      * @return string
      */
     public function getExternalId()
     {
         return $this->external_id;
     }
-
 
     /**
      * @return array
@@ -323,27 +301,11 @@ class Ticket extends BaseEntity
     }
 
     /**
-     * @param int $forum_topic_id
-     */
-    public function setForumTopicId($forum_topic_id)
-    {
-        $this->forum_topic_id = $forum_topic_id;
-    }
-
-    /**
      * @return int
      */
     public function getForumTopicId()
     {
         return $this->forum_topic_id;
-    }
-
-    /**
-     * @param int $group_id
-     */
-    public function setGroupId($group_id)
-    {
-        $this->group_id = $group_id;
     }
 
     /**
@@ -362,8 +324,6 @@ class Ticket extends BaseEntity
         return $this->has_incidents;
     }
 
-
-
     /**
      * @return int
      */
@@ -372,22 +332,12 @@ class Ticket extends BaseEntity
         return $this->id;
     }
 
-
-
     /**
      * @return int
      */
     public function getOrganizationId()
     {
         return $this->organization_id;
-    }
-
-    /**
-     * @param string $priority
-     */
-    public function setPriority($priority)
-    {
-        $this->priority = $priority;
     }
 
     /**
@@ -399,22 +349,12 @@ class Ticket extends BaseEntity
     }
 
     /**
-     * @param int $problemId
-     */
-    public function setProblemId($problemId)
-    {
-        $this->problemId = $problemId;
-    }
-
-    /**
      * @return int
      */
     public function getProblemId()
     {
         return $this->problemId;
     }
-
-
 
     /**
      * @return string
@@ -425,22 +365,12 @@ class Ticket extends BaseEntity
     }
 
     /**
-     * @param int $requester_id
-     */
-    public function setRequesterId($requester_id)
-    {
-        $this->requester_id = $requester_id;
-    }
-
-    /**
      * @return int
      */
     public function getRequesterId()
     {
         return $this->requester_id;
     }
-
-
 
     /**
      * @return \Dlin\Zendesk\Entity\SatisfactionRating
@@ -450,22 +380,12 @@ class Ticket extends BaseEntity
         return $this->satisfaction_rating;
     }
 
-
-
     /**
      * @return array
      */
     public function getSharingAgreementIds()
     {
         return $this->sharing_agreement_ids;
-    }
-
-    /**
-     * @param string $status
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
     }
 
     /**
@@ -477,27 +397,11 @@ class Ticket extends BaseEntity
     }
 
     /**
-     * @param string $subject
-     */
-    public function setSubject($subject)
-    {
-        $this->subject = $subject;
-    }
-
-    /**
      * @return string
      */
     public function getSubject()
     {
         return $this->subject;
-    }
-
-    /**
-     * @param int $submitter_id
-     */
-    public function setSubmitterId($submitter_id)
-    {
-        $this->submitter_id = $submitter_id;
     }
 
     /**
@@ -509,22 +413,12 @@ class Ticket extends BaseEntity
     }
 
     /**
-     * @param array $tags
-     */
-    public function setTags($tags)
-    {
-        $this->tags = $tags;
-    }
-
-    /**
      * @return array
      */
     public function getTags()
     {
         return $this->tags;
     }
-
-
 
     /**
      * @return int
@@ -535,22 +429,12 @@ class Ticket extends BaseEntity
     }
 
     /**
-     * @param string $type
-     */
-    public function setType($type)
-    {
-        $this->type = $type;
-    }
-
-    /**
      * @return string
      */
     public function getType()
     {
         return $this->type;
     }
-
-
 
     /**
      * @return string
@@ -560,8 +444,6 @@ class Ticket extends BaseEntity
         return $this->updated_at;
     }
 
-
-
     /**
      * @return string
      */
@@ -570,8 +452,6 @@ class Ticket extends BaseEntity
         return $this->url;
     }
 
-
-
     /**
      * @return \Dlin\Zendesk\Entity\Via
      */
@@ -579,5 +459,154 @@ class Ticket extends BaseEntity
     {
         return $this->via;
     }
+
+    /**
+     * @param string $subject
+     */
+    public function setSubject($subject)
+    {
+        $this->subject = $subject;
+    }
+
+    /**
+     * @param int $requester_id
+     */
+    public function setRequesterId($requester_id)
+    {
+        $this->requester_id = $requester_id;
+    }
+
+    /**
+     * @param int $submitter_id
+     */
+    public function setSubmitterId($submitter_id)
+    {
+        $this->checkNotUpdatableField();
+        $this->submitter_id = $submitter_id;
+    }
+
+    /**
+     * @param int $assignee_id
+     */
+    public function setAssigneeId($assignee_id)
+    {
+        $this->assignee_id = $assignee_id;
+    }
+
+    /**
+     * @param int $group_id
+     */
+    public function setGroupId($group_id)
+    {
+        $this->group_id = $group_id;
+    }
+
+    /**
+     * @param int $organization_id
+     */
+    public function setOrganizationId($organization_id)
+    {
+        $this->organization_id = $organization_id;
+    }
+
+    /**
+     * @param array $collaborator_ids
+     */
+    public function setCollaboratorIds($collaborator_ids)
+    {
+        $this->collaborator_ids = $collaborator_ids;
+    }
+
+    /**
+     * @param string $type
+     */
+    public function setType($type)
+    {
+        $this->checkEnumField($type, TicketType::values());
+        $this->type = $type;
+    }
+
+    /**
+     * @param string $priority
+     */
+    public function setPriority($priority)
+    {
+        $this->checkEnumField($priority, TicketPriority::values());
+        $this->priority = $priority;
+    }
+
+    /**
+     * @param string $status
+     */
+    public function setStatus($status)
+    {
+        $this->checkEnumField($status, TicketStatus::values());
+        $this->status = $status;
+    }
+
+    /**
+     * @param array $tags
+     */
+    public function setTags($tags)
+    {
+        $this->tags = $tags;
+    }
+
+    /**
+     * @param string $external_id
+     */
+    public function setExternalId($external_id)
+    {
+        $this->external_id = $external_id;
+    }
+
+    /**
+     * @param int $forum_topic_id
+     */
+    public function setForumTopicId($forum_topic_id)
+    {
+        $this->forum_topic_id = $forum_topic_id;
+    }
+
+    /**
+     * @param int $problemId
+     */
+    public function setProblemId($problemId)
+    {
+        $this->problemId = $problemId;
+    }
+
+    /**
+     * @param string $due_at
+     */
+    public function setDueAt($due_at)
+    {
+        $this->due_at = $due_at;
+    }
+
+    /**
+     * @param array $custom_fields
+     */
+    public function setCustomFields($custom_fields)
+    {
+        $this->custom_fields = $custom_fields;
+    }
+
+    /**
+     * @param \Dlin\Zendesk\Entity\TicketComment $comment
+     */
+    public function setComment($comment)
+    {
+        $this->comment = $comment;
+    }
+
+    /**
+     * Checks this ticket is creatable
+     */
+    public function checkCreatable(){
+        parent::checkCreatable();
+        $this->checkFieldsSet(array('subject', 'comment'));
+    }
+    
 
 }

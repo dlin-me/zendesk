@@ -10,7 +10,7 @@
 namespace Dlin\Zendesk\Enum;
 
 
-class TicketStatus
+class TicketStatus extends BaseEnum
 {
     const NEW_TICKET = 'new'; //New is a php reserve word
     const OPEN_TICKET = 'open';

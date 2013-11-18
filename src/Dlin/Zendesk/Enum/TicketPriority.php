@@ -10,7 +10,7 @@
 namespace Dlin\Zendesk\Enum;
 
 
-class TicketPriority
+class TicketPriority extends BaseEnum
 {
     const URGENT = 'urgent';
     const HIGH = 'high';

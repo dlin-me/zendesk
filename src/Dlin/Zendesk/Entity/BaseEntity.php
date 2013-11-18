@@ -13,6 +13,26 @@ namespace Dlin\Zendesk\Entity;
 abstract class BaseEntity
 {
 
+    /**
+     * @var \Dlin\Zendesk\Client\BaseClient
+     */
+    protected $managingCleint;
+
+    /**
+     * @param \Dlin\Zendesk\Client\BaseClient $managingCleint
+     */
+    public function setManagingCleint($managingCleint)
+    {
+        $this->managingCleint = $managingCleint;
+    }
+
+    /**
+     * @return \Dlin\Zendesk\Client\BaseClient
+     */
+    public function getManagingCleint()
+    {
+        return $this->managingCleint;
+    }
 
 
 
@@ -108,6 +128,73 @@ abstract class BaseEntity
 
         return $return;
 
+    }
+
+    /**
+     * This is used to validate a field having a  value amongst a list of valid value
+     *
+     * @param $value
+     * @param $enum
+     * @throws \Exception
+     */
+    protected function checkEnumField($value, $enum){
+        if(!in_array($enum, $value)){
+            throw new \Exception("Invalid value ($value) given, valid values are:".implode(', ',$enum));
+        }
+    }
+
+    /**
+     * Check if the field is Updatable or not
+     *
+     * @throws \Exception
+     */
+    protected function checkNotUpdatableField(){
+        if(property_exists($this, 'id') && $this->id > 0){
+            throw new \Exception("Field not updatable");
+        }
+    }
+
+    /**
+     * Checks if this entity is creatable
+     * @throws \Exception
+     */
+    public  function checkCreatable(){
+        if(property_exists($this, id) && $this->id > 0){
+            throw new \Exception(get_class($this)." has ID:".$this->id()." thus not creatable.");
+        }
+    }
+
+    /**
+     * Checks if the fields given are all set
+     * @param $fields
+     * @throws \Exception
+     */
+    protected function checkFieldsSet($fields){
+        foreach($fields as $field){
+            if(property_exists($this, $field) && $this->$field === null){
+                throw new \Exception("'$field' is required");
+            }
+
+        }
+
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function update(){
+        if($this->getManagingCleint()){
+           return  $this->getManagingCleint()->update($this);
+        }
+        throw new \Exception( get_class($this).' can not be updated without a managing client');
+    }
+
+    public function delete(){
+        if($this->getManagingCleint()){
+            return  $this->getManagingCleint()->delete($this);
+        }
+        throw new \Exception( get_class($this).' can not be deleted without a managing client');
     }
 
 

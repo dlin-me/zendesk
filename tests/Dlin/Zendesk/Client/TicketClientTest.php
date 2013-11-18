@@ -11,6 +11,9 @@ namespace Dlin\Zendesk\Tests\Client;
 
 
 use Dlin\Zendesk\Client\TicketClient;
+use Dlin\Zendesk\Entity\Ticket;
+use Dlin\Zendesk\Entity\TicketComment;
+use Dlin\Zendesk\Search\TicketFilter;
 use Dlin\Zendesk\ZendeskApi;
 
 class TicketClientTest extends \PHPUnit_Framework_TestCase {
@@ -79,7 +82,33 @@ class TicketClientTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertCount(2, $result);
 
-        print_r($result->getItems());
+
+
+    }
+
+    public function testSearch(){
+
+
+        $filter = new TicketFilter();
+        $filter->setSubject('hi');
+        $result = $this->client->searchTickets($filter);
+
+        echo $result->getCount();
+    }
+
+    public function testCreate(){
+        $ticket = new Ticket();
+        $comment = new TicketComment();
+        $comment->setBody('TEST Ticket By David Lin');
+
+        $ticket->setComment($comment);
+        $ticket->setSubject('Test Ticket Subject By David Lin');
+        $ticket->setTags(array('test'));
+
+        $result = $this->client->createTicket($ticket);
+
+        print_r($result);
+
 
     }
 

@@ -10,7 +10,10 @@
 namespace Dlin\Zendesk\Client;
 
 
+use Dlin\Zendesk\Entity\BaseEntity;
+use Dlin\Zendesk\Entity\TicketAudit;
 use Dlin\Zendesk\Exception\ZendeskException;
+use Dlin\Zendesk\Result\ChangeResult;
 use Dlin\Zendesk\Result\CollectionResult;
 use Dlin\Zendesk\ZendeskApi;
 use Guzzle\Http\Message\RequestInterface;
@@ -72,13 +75,14 @@ abstract class BaseClient
 
     }
 
+
     /**
      * Generic function for getting one entity
      *
      * @param $end_point
-     * @return null
+     * @return \Dlin\Zendesk\Entity\BaseEntity
      */
-    protected  function getOne($end_point)
+    protected function getOne($end_point)
     {
 
         $end_point = strtolower($end_point);
@@ -91,14 +95,58 @@ abstract class BaseClient
         $response = $this->processRequest($request);
         $result = $response->json();
 
+        $type = $this->getType();
+        $className = explode('\\', $type);
+        $basename = strtolower(end($className));
 
-        if ($result && isset($result['ticket'])) {
-            $type = $this->getType();
+
+        if ($result && isset($result[$basename])) {
             $t = new $type();
-            return $t->fromArray($result['ticket']);
+            $t->setManagingClient($this);
+            return $t->fromArray($result[$basename]);
         }
         return null;
 
+    }
+
+    /**
+     * Create an entity
+     *
+     * @param BaseEntity $entity
+     * @param $endPoint
+     * @return ChangeResult|null
+     */
+    protected function create(BaseEntity $entity, $endPoint)
+    {
+        $end_point = strtolower($endPoint);
+
+        if (strpos($end_point, 'http') !== 0) {
+            $end_point = $this->api->getApiUrl() . $end_point;
+        }
+        $type = $this->getType();
+        $className = explode('\\', $type);
+        $basename = strtolower(end($className));
+
+        $request = $this->api->getClient()->post($end_point, null, array($basename => $entity->toArray()));
+        $response = $this->processRequest($request);
+        $result = $response->json();
+
+
+
+        if ($result && isset($result[$basename])) {
+            $changeResult = new ChangeResult();
+            $t = new $type();
+            $t->setManagingClient($this);
+            $t->fromArray($result[$basename]);
+            $changeResult->setItem($t);
+            if (isset($result['audit'])) {
+                $audit = new TicketAudit();
+                $audit->fromArray($result['audit']);
+                $changeResult->setAudit($audit);
+            }
+            return $changeResult;
+        }
+        return null;
     }
 
 
@@ -171,12 +219,15 @@ abstract class BaseClient
         if (array_key_exists($key, $values) && is_array($values[$key])) {
             foreach ($values[$key] as $value) {
                 $entity = new $class();
+                $entity->setManagingClient($this);
                 $result[] = $entity->fromArray($value);
             }
         }
         return $result;
 
     }
+
+
 
 
 }

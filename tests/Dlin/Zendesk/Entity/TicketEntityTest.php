@@ -13,6 +13,7 @@ namespace Dlin\Zendesk\Tests\Entity;
 use Dlin\Zendesk\Entity\Ticket;
 use Dlin\Zendesk\Enum\SatisfactionRatingScore;
 
+
 class TicketEntityTest extends \PHPUnit_Framework_TestCase
 {
 

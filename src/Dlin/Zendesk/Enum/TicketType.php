@@ -10,7 +10,7 @@
 namespace Dlin\Zendesk\Enum;
 
 
-class TicketType
+class TicketType extends BaseEnum
 {
     const PROBLEM = 'problem';
     const INCIDENT = 'incident';

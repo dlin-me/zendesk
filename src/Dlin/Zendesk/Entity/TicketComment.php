@@ -70,5 +70,111 @@ class TicketComment extends BaseEntity
      */
     protected $attachments;
 
+    /**
+     * @return array
+     */
+    public function getAttachments()
+    {
+        return $this->attachments;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAuthorId()
+    {
+        return $this->author_id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBody()
+    {
+        return $this->body;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHtmlBody()
+    {
+        return $this->html_body;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getProtected()
+    {
+        return $this->protected;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getTrusted()
+    {
+        return $this->trusted;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param array $attachments
+     */
+    public function setAttachments($attachments)
+    {
+        $this->attachments = $attachments;
+    }
+
+    /**
+     * @param string $body
+     */
+    public function setBody($body)
+    {
+        $this->body = $body;
+    }
+
+    /**
+     * @param string $html_body
+     */
+    public function setHtmlBody($html_body)
+    {
+        $this->html_body = $html_body;
+    }
+
+    /**
+     * @param boolean $trusted
+     */
+    public function setTrusted($trusted)
+    {
+        $this->trusted = $trusted;
+    }
+
+    /**
+     * @param boolean $protected
+     */
+    public function setProtected($protected)
+    {
+        $this->protected = $protected;
+    }
+
+
+
 
 }

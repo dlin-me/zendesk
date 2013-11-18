@@ -10,7 +10,7 @@
 namespace Dlin\Zendesk\Enum;
 
 
-class SatisfactionRatingScore {
+class SatisfactionRatingScore extends BaseEnum{
 
     const OFFERED = 'offered';
     const UNOFFERED = 'unoffered';

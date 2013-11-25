@@ -14,7 +14,7 @@ use Dlin\Zendesk\Entity\BaseEntity;
 use Dlin\Zendesk\Entity\TicketAudit;
 use Dlin\Zendesk\Exception\ZendeskException;
 use Dlin\Zendesk\Result\ChangeResult;
-use Dlin\Zendesk\Result\CollectionResult;
+use Dlin\Zendesk\Result\PaginatedResult;
 use Dlin\Zendesk\ZendeskApi;
 use Guzzle\Http\Message\RequestInterface;
 use Guzzle\Service\Client;
@@ -38,6 +38,17 @@ abstract class BaseClient
         $this->api = $api;
     }
 
+    /**
+     *
+     * This is to make entity able to call update an delete methods
+     *
+     * @param BaseEntity $entity
+     */
+    public function manage(BaseEntity $entity){
+        $entity->setManagingClient($this);
+    }
+
+
 
     /**
      * @return string
@@ -53,25 +64,60 @@ abstract class BaseClient
      * @param int $per_page
      * @param null $sort_by
      * @param string $sort_order
-     * @return \Dlin\Zendesk\Result\CollectionResult
+     * @return \Dlin\Zendesk\Result\PaginatedResult
      */
-    public function getCollection($end_point, $page = 1, $per_page = 100, $sort_by = null, $sort_order = 'asc')
+    public function getCollection($end_point, $collectionName,  $page = 1, $per_page = 100, $sort_by = null, $sort_order = 'asc')
     {
         $end_point = strtolower($end_point);
         if (strpos($end_point, 'http') !== 0) {
             $end_point = $this->api->getApiUrl() . $end_point;
         }
 
-        $request = $this->api->getClient()->get($end_point);
-        $query = $request->getQuery()->set('page', $page)->set('per_page', $per_page)->set('sort_order', $sort_order == 'asc' ? 'asc' : 'desc');
+        $request = $this->api->get($end_point);
+        $query = $request->getQuery()->set('page', $page)->set('per_page', $per_page);
         if ($sort_by) {
-            $$query->set('sort_by', $sort_by);
+            $query->set('sort_by', $sort_by)->set('sort_order', $sort_order == 'asc' ? 'asc' : 'desc');
         }
 
-        $response = $this->processRequest($request);
-        $results = $response->json();
 
-        return $this->getCollectionResult($this, 'tickets', $this->getType(), $results, $page, $per_page);
+        $response = $this->processRequest($request);
+
+
+        $values = $response->json();
+
+        $result = new PaginatedResult();
+        $result->setClient($this);
+
+        if (array_key_exists('count', $values)) {
+            $result->setCount($values['count']);
+        }
+
+
+
+        /*
+        if (array_key_exists('next_page', $values)) {
+            $result->setNextPage($values['next_page']); //Note: the api skips the per_page parameter, making it useless
+        }
+        if (array_key_exists('previous_page', $values)) {
+            $result->setPreviousPage($values['previous_page']); //Note: the api always return null
+        }
+        */
+
+        $result->setCurrentPage($page);
+        $result->setPerPage($per_page);
+        $result->setEndPoint($end_point);
+
+        $type = $this->getType();
+
+        if (array_key_exists($collectionName, $values) && is_array($values[$collectionName])) {
+            foreach ($values[$collectionName] as $value) {
+                $entity = new $type();
+                $this->manage($entity);
+                $result[] = $entity->fromArray($value);
+            }
+        }
+        return $result;
+
 
     }
 
@@ -91,19 +137,19 @@ abstract class BaseClient
         }
 
 
-        $request = $this->api->getClient()->get($end_point);
+        $request = $this->api->get($end_point);
         $response = $this->processRequest($request);
         $result = $response->json();
 
         $type = $this->getType();
         $className = explode('\\', $type);
-        $basename = strtolower(end($className));
+        $baseName = strtolower(end($className));
 
 
-        if ($result && isset($result[$basename])) {
+        if ($result && isset($result[$baseName])) {
             $t = new $type();
             $t->setManagingClient($this);
-            return $t->fromArray($result[$basename]);
+            return $t->fromArray($result[$baseName]);
         }
         return null;
 
@@ -116,7 +162,7 @@ abstract class BaseClient
      * @param $endPoint
      * @return ChangeResult|null
      */
-    protected function create(BaseEntity $entity, $endPoint)
+    public function saveEntity(BaseEntity $entity, $endPoint='')
     {
         $end_point = strtolower($endPoint);
 
@@ -125,19 +171,20 @@ abstract class BaseClient
         }
         $type = $this->getType();
         $className = explode('\\', $type);
-        $basename = strtolower(end($className));
+        $baseName = strtolower(end($className));
 
-        $request = $this->api->getClient()->post($end_point, null, array($basename => $entity->toArray()));
+        $method = $entity->getId() ? 'put':'post';
+
+        $request = $this->api->$method($end_point, null, json_encode(array($baseName => $entity->toArray(true))));
         $response = $this->processRequest($request);
         $result = $response->json();
 
 
-
-        if ($result && isset($result[$basename])) {
+        if ($result && isset($result[$baseName])) {
             $changeResult = new ChangeResult();
             $t = new $type();
-            $t->setManagingClient($this);
-            $t->fromArray($result[$basename]);
+            $this->manage($t);
+            $t->fromArray($result[$baseName]);
             $changeResult->setItem($t);
             if (isset($result['audit'])) {
                 $audit = new TicketAudit();
@@ -150,6 +197,37 @@ abstract class BaseClient
     }
 
 
+    public function deleteById($id, $endPoint=''){
+
+        $end_point = strtolower($endPoint).'/'.$id.'.json';
+
+        if (strpos($end_point, 'http') !== 0) {
+            $end_point = $this->api->getApiUrl() . $end_point;
+        }
+        $response = $this->api->delete($end_point)->send();
+        return $response->getStatusCode() == 200;
+
+    }
+
+
+
+
+    public function deleteByIds(array $ids, $end_point=''){
+
+
+
+        if (strpos($end_point, 'http') !== 0) {
+            $end_point = $this->api->getApiUrl() . $end_point;
+        }
+        $request = $this->api->delete($end_point);
+        $request->getQuery()->set('ids',implode(',',$ids) );
+        $response=$request->send();
+        return $response->getStatusCode() == 200;
+
+    }
+
+
+
     /**
      * Process request into a response object
      *
@@ -159,7 +237,11 @@ abstract class BaseClient
      */
     public function processRequest(RequestInterface $request)
     {
+
+
         $response = $request->send();
+
+
         $attempt = 0;
         while ($response->getStatusCode() == 429 && $attempt < 5) {
             $wait = $response->getHeader('Retry-After');
@@ -196,36 +278,7 @@ abstract class BaseClient
     }
 
 
-    public function getCollectionResult(BaseClient $client, $key, $class, $values, $page = 1, $per_page = 100)
-    {
 
-
-        $result = new CollectionResult();
-        $result->setClient($client);
-
-        if (array_key_exists('count', $values)) {
-            $result->setCount($values['count']);
-        }
-        if (array_key_exists('next_page', $values)) {
-            $result->setNextPage($values['next_page']);
-        }
-        if (array_key_exists('previous_page', $values)) {
-            $result->setPreviousPage($values['previous_page']);
-        }
-
-        $result->setCurrentPage($page);
-        $result->setPerPage($per_page);
-
-        if (array_key_exists($key, $values) && is_array($values[$key])) {
-            foreach ($values[$key] as $value) {
-                $entity = new $class();
-                $entity->setManagingClient($this);
-                $result[] = $entity->fromArray($value);
-            }
-        }
-        return $result;
-
-    }
 
 
 

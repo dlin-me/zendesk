@@ -13,6 +13,19 @@ namespace Dlin\Zendesk\Entity;
 abstract class BaseEntity
 {
 
+    protected $_changes;
+    protected function addChange($fieldName){
+        if(!is_array($this->_changes)){
+            $this->_changes = array();
+        }
+        $this->_changes[$fieldName] = 1;
+        return $this;
+    }
+
+    public function resetChanges(){
+        $this->_changes = array();
+    }
+
     /**
      * @var \Dlin\Zendesk\Client\BaseClient
      */
@@ -21,7 +34,7 @@ abstract class BaseEntity
     /**
      * @param \Dlin\Zendesk\Client\BaseClient $managingCleint
      */
-    public function setManagingCleint($managingCleint)
+    public function setManagingClient($managingCleint)
     {
         $this->managingCleint = $managingCleint;
     }
@@ -41,13 +54,17 @@ abstract class BaseEntity
      *
      * @return \stdClass
      */
-    public function toArray()
+    public function toArray($changedOnly=false)
     {
         $vars = get_object_vars($this);
         $object = array();
 
+        if(!is_array($this->_changes)){
+            $this->_changes = array();
+        }
+
         foreach ($vars as $k => $v) {
-            if ($v !== null) {
+            if ( $v !== null && (!$changedOnly || array_key_exists($k, $this->_changes))) {
                 if (is_array($v)) {
                     $subV = array();
 
@@ -159,13 +176,14 @@ abstract class BaseEntity
      * @throws \Exception
      */
     public  function checkCreatable(){
-        if(property_exists($this, id) && $this->id > 0){
+        if(property_exists($this, 'id') && $this->id > 0){
             throw new \Exception(get_class($this)." has ID:".$this->id()." thus not creatable.");
         }
+
     }
 
     /**
-     * Checks if the fields given are all set
+     * Checks if the fields given are all assigned
      * @param $fields
      * @throws \Exception
      */
@@ -183,16 +201,27 @@ abstract class BaseEntity
     /**
      * @return bool
      */
-    public function update(){
+    public function udpate(){
         if($this->getManagingCleint()){
-           return  $this->getManagingCleint()->update($this);
+           $result =  $this->getManagingCleint()->save($this);
+            if($result){
+                $this->resetChanges();
+            }
+            return $result;
         }
         throw new \Exception( get_class($this).' can not be updated without a managing client');
     }
 
+
+
     public function delete(){
         if($this->getManagingCleint()){
-            return  $this->getManagingCleint()->delete($this);
+            $result =   $this->getManagingCleint()->delete($this);
+            if($result){
+                $this->id = 0;
+                $this->resetChanges();
+            }
+            return $result;
         }
         throw new \Exception( get_class($this).' can not be deleted without a managing client');
     }

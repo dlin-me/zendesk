@@ -140,6 +140,7 @@ class TicketComment extends BaseEntity
     public function setAttachments($attachments)
     {
         $this->attachments = $attachments;
+        return $this->addChange('attachments');
     }
 
     /**
@@ -148,6 +149,7 @@ class TicketComment extends BaseEntity
     public function setBody($body)
     {
         $this->body = $body;
+        return $this->addChange('body');
     }
 
     /**
@@ -156,6 +158,7 @@ class TicketComment extends BaseEntity
     public function setHtmlBody($html_body)
     {
         $this->html_body = $html_body;
+        return $this->addChange('html_body');
     }
 
     /**
@@ -164,6 +167,7 @@ class TicketComment extends BaseEntity
     public function setTrusted($trusted)
     {
         $this->trusted = $trusted;
+        return $this->addChange('trusted');
     }
 
     /**
@@ -172,6 +176,7 @@ class TicketComment extends BaseEntity
     public function setProtected($protected)
     {
         $this->protected = $protected;
+        return $this->addChange('protected');
     }
 
 

@@ -70,7 +70,8 @@ JSON;
 
         $data = json_decode($data, true);
 
-        $ticket = new Ticket($data);
+        $ticket = new Ticket();
+        $ticket->fromArray($data);
 
         $this->assertEquals($ticket->getId(), 35436);
         $this->assertEquals($ticket->getDescription(), "The fire is very colorful.");

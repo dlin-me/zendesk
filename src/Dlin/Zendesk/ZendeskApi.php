@@ -10,27 +10,27 @@ namespace Dlin\Zendesk;
 
 use Guzzle\Service\Client;
 
-class ZendeskApi {
+class ZendeskApi extends \Guzzle\Http\Client {
 
+    /**
+     * @var string
+     */
     protected $emailAddress;
+    /**
+     * @var string
+     */
     protected $apiToken;
-    protected $apiUrl; //e.g. https://subdomain.zendesk.com/api/v2
-
     /**
-     * @var \Guzzle\Service\Client
+     *
+     * e.g. https://subdomain.zendesk.com/api/v2
+     * @var string
      */
-    private $client;
+    protected $apiUrl;
+
+
 
     /**
-     * @return \Guzzle\Service\Client
-     */
-    public function getClient()
-    {
-        return $this->client;
-    }
-
-    /**
-     * @return mixed
+     * @return string
      */
     public function getApiToken()
     {
@@ -38,7 +38,7 @@ class ZendeskApi {
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getApiUrl()
     {
@@ -46,7 +46,7 @@ class ZendeskApi {
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getEmailAddress()
     {
@@ -59,12 +59,14 @@ class ZendeskApi {
         $this->emailAddress = $emailAddress;
         $this->apiToken = $apiToken;
         $this->apiUrl = $apiUrl;
-        $this->client = new Client($apiUrl, array('curl.options' => array('CURLOPT_FOLLOWLOCATION' => 1,
+
+        parent::__construct($apiUrl, array('curl.options' => array('CURLOPT_FOLLOWLOCATION' => 1,
             'CURLOPT_MAXREDIRS' => 10,
             'CURLOPT_TIMEOUT'=>10,
-            'CURLOPT_USERPWD'=>$this->emailAddress . '/token:'. $this->apiToken
+            'CURLOPT_USERPWD'=>$emailAddress . '/token:'. $apiToken
         )));
-        $this->client->setDefaultHeaders(array('Content-type' => 'application/json', 'User-Agent' => 'MozillaXYZ/1.0'));
+
+        $this->setDefaultHeaders(array('Content-type' => 'application/json', 'User-Agent' => 'MozillaXYZ/1.0'));
     }
 
 

@@ -33,10 +33,8 @@ class TicketClientTest extends \PHPUnit_Framework_TestCase {
     {
 
         //all tickets
-        $resultSet = $this->client->getAllTickets(1,1);
+        $resultSet = $this->client->getAll(1,1);
         $this->assertGreaterThan(0, $resultSet->getCount() );
-        $this->assertNull($resultSet->getPreviousPage());
-        $this->assertNotNull($resultSet->getNextPage());
         $this->assertEquals(1, count($resultSet));
 
 
@@ -54,10 +52,10 @@ class TicketClientTest extends \PHPUnit_Framework_TestCase {
 
         //Test result set next and prev
         $nextResultSet = $resultSet->getNextResult();
-
         $this->assertEquals($resultSet->getCount(), $nextResultSet->getCount() );
-        $this->assertNotNull($nextResultSet->getPreviousPage());
-        $this->assertNotNull($nextResultSet->getNextPage());
+
+
+
         $this->assertEquals(1, count($nextResultSet));
 
         $nextTicket = $nextResultSet[0];
@@ -66,8 +64,7 @@ class TicketClientTest extends \PHPUnit_Framework_TestCase {
 
         $prevResultSet = $nextResultSet->getPreviousResult();
         $this->assertGreaterThan(0, $prevResultSet->getCount() );
-        $this->assertNull($prevResultSet->getPreviousPage());
-        $this->assertNotNull($prevResultSet->getNextPage());
+
         $this->assertEquals(1, count($prevResultSet));
 
         $prevTicket = $prevResultSet[0];
@@ -78,7 +75,7 @@ class TicketClientTest extends \PHPUnit_Framework_TestCase {
         $twoTicketIds = array($ticket->getId(), $nextTicket->getId());
         $this->assertCount(2, $twoTicketIds);
 
-        $result = $this->client->getMultiple($twoTicketIds);
+        $result = $this->client->getByIds($twoTicketIds);
 
         $this->assertCount(2, $result);
 
@@ -86,28 +83,58 @@ class TicketClientTest extends \PHPUnit_Framework_TestCase {
 
     }
 
-    public function testSearch(){
 
 
-        $filter = new TicketFilter();
-        $filter->setSubject('hi');
-        $result = $this->client->searchTickets($filter);
-
-        echo $result->getCount();
-    }
-
-    public function testCreate(){
-        $ticket = new Ticket();
+    public function testCreateSearchDelete(){
         $comment = new TicketComment();
         $comment->setBody('TEST Ticket By David Lin');
 
+        $ticket = new Ticket();
         $ticket->setComment($comment);
-        $ticket->setSubject('Test Ticket Subject By David Lin');
+        $ticket->setSubject('Test Ticket Subject By David Lin 1');
         $ticket->setTags(array('test'));
 
-        $result = $this->client->createTicket($ticket);
+        $this->client->save($ticket);
 
-        print_r($result);
+        $ticket = new Ticket();
+        $ticket->setComment($comment);
+        $ticket->setSubject('Test Ticket Subject By David Lin 2');
+        $ticket->setTags(array('test'));
+        $this->client->save($ticket);
+
+
+        $ticket = new Ticket();
+        $ticket->setComment($comment);
+        $ticket->setSubject('Test Ticket Subject By David Lin 3');
+        $ticket->setTags(array('test'));
+        $this->client->save($ticket);
+
+        sleep(5);//need to wait otherwise not searchable
+
+        $filter = new TicketFilter();
+        $filter->setSubject('Test David Lin');
+
+        $searchResult = $this->client->search($filter);
+
+        $count = $searchResult->getCount();
+        $this->assertGreaterThanOrEqual(3, $count);
+
+
+        //delete one
+        $item = $searchResult->getItems();
+        $this->client->delete($item[0]);
+
+        $searchResult = $this->client->search($filter);
+
+        $newCount = $searchResult->getCount();
+        $this->assertEquals(--$count, $newCount);
+
+        $this->client->deleteTickets($searchResult->getItems());
+
+        $this->assertEquals(0, $this->client->search($filter)->getCount());
+
+
+
 
 
     }

@@ -41,11 +41,11 @@ class TicketClient extends BaseClient
      * @param array $ids
      * @param int $page
      * @param int $per_page
-     * @return \Dlin\Zendesk\Result\CollectionResult
+     * @return \Dlin\Zendesk\Result\PaginatedResult
      */
-    public function getMultiple(array $ids, $page=1, $per_page=100){
+    public function getByIds(array $ids, $page=1, $per_page=100){
 
-        return $this->getCollection('tickets/show_many.json?ids='.implode(',',$ids), $page, $per_page);
+        return $this->getCollection('tickets/show_many.json?ids='.implode(',',$ids), 'tickets',$page, $per_page);
     }
 
     /**
@@ -53,10 +53,10 @@ class TicketClient extends BaseClient
      *
      * @param int $page
      * @param int $per_page
-     * @return \Dlin\Zendesk\Result\CollectionResult
+     * @return \Dlin\Zendesk\Result\PaginatedResult
      */
-    public function getAllTickets($page=1, $per_page=100){
-        return $this->getCollection('tickets.json', $page, $per_page);
+    public function getAll($page=1, $per_page=100){
+        return $this->getCollection('tickets.json', 'tickets',$page, $per_page);
     }
 
     /**
@@ -64,10 +64,10 @@ class TicketClient extends BaseClient
      *
      * @param int $page
      * @param int $per_page
-     * @return \Dlin\Zendesk\Result\CollectionResult
+     * @return \Dlin\Zendesk\Result\PaginatedResult
      */
-    public function getRecentTickets($page=1, $per_page=100){
-        return $this->getCollection('tickets/recent.json', $page, $per_page);
+    public function getRecent($page=1, $per_page=100){
+        return $this->getCollection('tickets/recent.json', 'tickets',$page, $per_page);
     }
 
     /**
@@ -76,11 +76,11 @@ class TicketClient extends BaseClient
      * @param $organization_id
      * @param int $page
      * @param int $per_page
-     * @return \Dlin\Zendesk\Result\CollectionResult
+     * @return \Dlin\Zendesk\Result\PaginatedResult
      */
-    public function getOrganizationsTickets($organization_id, $page=1, $per_page=100){
+    public function getOrganizationTickets($organization_id, $page=1, $per_page=100){
 
-        return $this->getCollection("organizations/$organization_id/tickets.json", $page, $per_page);
+        return $this->getCollection("organizations/$organization_id/tickets.json", 'tickets', $page, $per_page);
     }
 
     /**
@@ -89,10 +89,10 @@ class TicketClient extends BaseClient
      * @param $user_id
      * @param int $page
      * @param int $per_page
-     * @return \Dlin\Zendesk\Result\CollectionResult
+     * @return \Dlin\Zendesk\Result\PaginatedResult
      */
     public function getUserRequestedTickets($user_id, $page=1, $per_page=100){
-        return $this->getCollection("users/$user_id/tickets/requested.json", $page, $per_page);
+        return $this->getCollection("users/$user_id/tickets/requested.json",'tickets', $page, $per_page);
     }
 
     /**
@@ -100,10 +100,10 @@ class TicketClient extends BaseClient
      * @param $user_id
      * @param int $page
      * @param int $per_page
-     * @return \Dlin\Zendesk\Result\CollectionResult
+     * @return \Dlin\Zendesk\Result\PaginatedResult
      */
     public function getUserCcdTickets($user_id, $page=1, $per_page=100){
-        return $this->getCollection("users/$user_id/tickets/ccd.json", $page, $per_page);
+        return $this->getCollection("users/$user_id/tickets/ccd.json",'tickets', $page, $per_page);
     }
 
 
@@ -115,20 +115,48 @@ class TicketClient extends BaseClient
      * @param int $per_page
      * @param null $sort_by
      * @param string $sort_order
-     * @return \Dlin\Zendesk\Result\CollectionResult
+     * @return \Dlin\Zendesk\Result\PaginatedResult
      */
-    public function searchTickets(TicketFilter $query, $page=1, $per_page=100, $sort_by=null, $sort_order='asc'){
+    public function search(TicketFilter $query, $page=1, $per_page=100, $sort_by=null, $sort_order='asc'){
 
-        $endPoint = 'search.json?query='.urlencode(implode(' ',$query->toArray()));
+        $endPoint = 'search.json?query='.rawurlencode(implode(' ',$query->toArray()));
 
-        return $this->getCollection($endPoint, $page, $per_page, $sort_by, $sort_order);
+        return $this->getCollection($endPoint, 'results', $page, $per_page, $sort_by, $sort_order);
     }
 
 
-    public function createTicket(Ticket $ticket){
 
-        return $this->create($ticket, 'tickets.json');
+    /**
+     * @param Ticket $ticket
+     * @return \Dlin\Zendesk\Result\ChangeResult|null
+     */
+    public function save(Ticket $ticket){
+        return parent::saveEntity($ticket, 'tickets.json');
+    }
 
+    /**
+     *
+     * Delete one given ticket
+     *
+     * @param Ticket $ticket
+     * @return bool
+     */
+    public function delete(Ticket $ticket){
+        return parent::deleteById($ticket->getId(), 'tickets');
+    }
+
+    /**
+     * Batch delete tickets
+     *
+     * @param array $tickets
+     * @return bool
+     */
+    public function deleteTickets(array $tickets){
+        $ids = array();
+        foreach($tickets as $ticket){
+            $ids[] = $ticket->getId();
+        }
+        return parent::deleteByIds($ids, 'tickets/destroy_many.json');
     }
 
 

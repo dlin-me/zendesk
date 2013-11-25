@@ -329,7 +329,7 @@ class Ticket extends BaseEntity
      */
     public function getId()
     {
-        return $this->id;
+        return intval($this->id);
     }
 
     /**
@@ -466,6 +466,8 @@ class Ticket extends BaseEntity
     public function setSubject($subject)
     {
         $this->subject = $subject;
+
+        return $this->addChange('subject');
     }
 
     /**
@@ -474,6 +476,7 @@ class Ticket extends BaseEntity
     public function setRequesterId($requester_id)
     {
         $this->requester_id = $requester_id;
+        return $this->addChange('requester_id');
     }
 
     /**
@@ -483,6 +486,7 @@ class Ticket extends BaseEntity
     {
         $this->checkNotUpdatableField();
         $this->submitter_id = $submitter_id;
+        return $this->addChange('submitter_id');
     }
 
     /**
@@ -491,6 +495,7 @@ class Ticket extends BaseEntity
     public function setAssigneeId($assignee_id)
     {
         $this->assignee_id = $assignee_id;
+        return $this->addChange('assignee_id');
     }
 
     /**
@@ -499,6 +504,7 @@ class Ticket extends BaseEntity
     public function setGroupId($group_id)
     {
         $this->group_id = $group_id;
+        return $this->addChange('group_id');
     }
 
     /**
@@ -507,6 +513,7 @@ class Ticket extends BaseEntity
     public function setOrganizationId($organization_id)
     {
         $this->organization_id = $organization_id;
+        return $this->addChange('organization_id');
     }
 
     /**
@@ -515,6 +522,7 @@ class Ticket extends BaseEntity
     public function setCollaboratorIds($collaborator_ids)
     {
         $this->collaborator_ids = $collaborator_ids;
+        return $this->addChange('collaborator_ids');
     }
 
     /**
@@ -524,6 +532,7 @@ class Ticket extends BaseEntity
     {
         $this->checkEnumField($type, TicketType::values());
         $this->type = $type;
+        return $this->addChange('type');
     }
 
     /**
@@ -533,6 +542,7 @@ class Ticket extends BaseEntity
     {
         $this->checkEnumField($priority, TicketPriority::values());
         $this->priority = $priority;
+        return $this->addChange('priority');
     }
 
     /**
@@ -542,6 +552,7 @@ class Ticket extends BaseEntity
     {
         $this->checkEnumField($status, TicketStatus::values());
         $this->status = $status;
+        return $this->addChange('status');
     }
 
     /**
@@ -550,6 +561,7 @@ class Ticket extends BaseEntity
     public function setTags($tags)
     {
         $this->tags = $tags;
+        return $this->addChange('tags');
     }
 
     /**
@@ -558,6 +570,7 @@ class Ticket extends BaseEntity
     public function setExternalId($external_id)
     {
         $this->external_id = $external_id;
+        return $this->addChange('external_id');
     }
 
     /**
@@ -566,6 +579,7 @@ class Ticket extends BaseEntity
     public function setForumTopicId($forum_topic_id)
     {
         $this->forum_topic_id = $forum_topic_id;
+        return $this->addChange('forum_topic_id');
     }
 
     /**
@@ -574,6 +588,7 @@ class Ticket extends BaseEntity
     public function setProblemId($problemId)
     {
         $this->problemId = $problemId;
+        return $this->addChange('problemId');
     }
 
     /**
@@ -582,6 +597,7 @@ class Ticket extends BaseEntity
     public function setDueAt($due_at)
     {
         $this->due_at = $due_at;
+        return $this->addChange('due_at');
     }
 
     /**
@@ -590,6 +606,7 @@ class Ticket extends BaseEntity
     public function setCustomFields($custom_fields)
     {
         $this->custom_fields = $custom_fields;
+        return $this->addChange('custom_fields');
     }
 
     /**
@@ -598,6 +615,7 @@ class Ticket extends BaseEntity
     public function setComment($comment)
     {
         $this->comment = $comment;
+        return $this->addChange('comment');
     }
 
     /**

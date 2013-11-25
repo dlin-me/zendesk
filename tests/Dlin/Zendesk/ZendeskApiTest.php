@@ -14,9 +14,7 @@ class ZendeskApiTest extends \PHPUnit_Framework_TestCase
         $api = new ZendeskApi('api@estimateone.com', 'c6EFbHZ7YdggbIMSvOqiq3HduOLljaV7DSgexzoc',
         'https://estimateone.zendesk.com/api/v2/');
 
-        $resp = $api->getClient()->get(
-            'tickets.json'
-        )->send();
+        $resp = $api->get('tickets.json')->send();
 
         $this->assertArrayHasKey('tickets', $resp->json());
 

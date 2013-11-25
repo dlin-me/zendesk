@@ -10,7 +10,7 @@
 namespace Dlin\Zendesk\Entity;
 
 
-class TicketRequester
+class TicketRequester extends BaseEntity
 {
     /**
      * @var integer
@@ -34,6 +34,7 @@ class TicketRequester
     public function setEmail($email)
     {
         $this->email = $email;
+        return $this;
     }
 
     /**
@@ -42,6 +43,7 @@ class TicketRequester
     public function getEmail()
     {
         return $this->email;
+
     }
 
     /**
@@ -50,6 +52,7 @@ class TicketRequester
     public function setLocaleId($locale_id)
     {
         $this->locale_id = $locale_id;
+        return $this->addChange('locale_id');
     }
 
     /**
@@ -66,6 +69,7 @@ class TicketRequester
     public function setName($name)
     {
         $this->name = $name;
+        return $this->addChange('name');
     }
 
     /**

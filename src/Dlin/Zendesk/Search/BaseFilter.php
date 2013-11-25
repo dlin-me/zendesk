@@ -30,6 +30,7 @@ abstract class BaseFilter
     {
         $vars = get_object_vars($this);
         $vars['type'] = $this->getType();
+
         $queries = array();
         foreach ($vars as $k => $v) {
             if ($v !== null) {

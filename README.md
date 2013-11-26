@@ -117,7 +117,7 @@ The $response variable is an array mapping to server's responded JSON data:
 }
 ```
 
-This exactly the same as the examples given in Zendesk's [documentation](http://developer.zendesk.com/documentation/rest_api/tickets.html) page.
+This is exactly the same as the examples given in Zendesk's [documentation](http://developer.zendesk.com/documentation/rest_api/tickets.html) page.
 
 Similarly, here are some other examples:
 
@@ -187,7 +187,7 @@ $updateData = '{"ticket":{"status":"solved",   \
        
 
 //WebService URL endpoint
-$endPoint = 'tickets.json';
+$endPoint = 'tickets/123.json'; //e.g. ticket id 123
 
 //No need
 $extraHttpHeader = null; 
@@ -444,7 +444,101 @@ $ticket->setTags(array('test'));
 $result = $ticketClient->save($ticket); //more later for the $result
 
 ```
+
+
+The $result is an object of type Dlin\Zendesk\Result\ChangeResult allow access to the [Audit](http://developer.zendesk.com/documentation/rest_api/ticket_audits.html) object and the updated ticket. 
+
+```
+$savedTicket = $result->getItem();
+$audit = $result->getAudit();
+```
+
+Note that the original ticket object will not be updated upon new ticket creation. It works as a template for new tickets only. You can call the **save** method again to create another ticket or ignore it afterward. 
+
+
+
 #####4. Updating Tickets
+The **save** method for creating tickets can also be used to update a ticket. The result format is the same as the one from creating a ticket. i.e. a ChangeResult instance.
+
+```
+$ticket = $ticketClient->getOneById(123);
+$ticket->setSubject('Updated new subject');
+
+//Updating using TicketClient::save()
+$result = $ticketClient->save($ticket);
+
+//Or you can do this
+$ticket->save();
+
+```
+When updating a ticket, the library only submit updated/modified fields to Zendesk's server since last update/creation. 
+
+If a ticket is retrieved by the TicketClient object, it is said that it is 'managed' by the TicketClient and then you can call the **save** method on the Ticket object itself to update the ticket. In this case the $ticket object will be loaded with updated data (e.g. the lastUpdate timestamp ).The returned result of the Ticket::save() method is an instance of the Dlin\Zendesk\Entity\TicketAudit class providing data about an [Audit](http://developer.zendesk.com/documentation/rest_api/ticket_audits.html) resource.
+
+The above example makes a request to get the ticket before updating it. If you know the ticket ID you are updating, you can also do this:
+
+```
+$ticket = new Ticket(123);
+$tickets->setSubject('Updated subject') ;
+
+//Updating using TicketClient::save()
+$result = $ticketClient->save($ticket);
+
+
+//Or manually manage the ticket
+$ticketClient->manage($ticket);
+$ticket->save();
+
+
+```
+
+You can manually add a Ticket object to be managed by a TicketClient object using the **manage** method. 
+
+
+#####5. Deleting Tickets
+
+The TicketClient class provide two methods for deleting tickets.
+
+```
+//delete one ticket 
+$ticketClient->deleteTicket(new Ticket(123));
+
+//delete multiple tickets
+$toDelete = array();
+$toDelete[] = new Ticket(123);
+$toDelete[] = new Ticket(124);
+$ticketClient->deleteTickets($toDelete);
+
+
+//OR using Ticket::delete() method
+$ticket = new Ticket(123);
+$ticketClient->manage($ticket);
+$ticket->delete();
+
+
+```
+
+If a ticket is 'managed' by a TicketClient, either fetched by the TicketClient or manually managed by the TicketClient, you can call the Ticket::delete() method to delete a ticket.
+
+All the three delete methods return true on success, and false on failure.
+
+
+Here is another example to delete all tickets having 'test subject' in the subject
+
+```
+$filter = new TicketFilter();
+$filter->setSubject('test subject');
+
+$searchResult = $ticketClient->search($filter);
+
+$ticketClient->deleteTickets($searchResult->getItems());
+
+
+```
+
+
+
+
 
 
 

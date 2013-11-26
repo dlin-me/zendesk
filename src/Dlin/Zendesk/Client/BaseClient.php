@@ -175,7 +175,12 @@ abstract class BaseClient
 
         $method = $entity->getId() ? 'put':'post';
 
-        $request = $this->api->$method($end_point, null, json_encode(array($baseName => $entity->toArray(true))));
+        $changes = $entity->toArray(true);
+        if(empty($changes)){
+            return null;
+        }
+
+        $request = $this->api->$method($end_point, null, json_encode(array($baseName => $changes)));
         $response = $this->processRequest($request);
         $result = $response->json();
 

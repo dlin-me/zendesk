@@ -13,16 +13,34 @@ namespace Dlin\Zendesk\Entity;
 abstract class BaseEntity
 {
 
+    /**
+     *
+     * @var integer
+     * @readonly
+     */
+    protected $id;
+
+
+    public function __construct($id=null){
+        if($id > 0){
+            $this->id = $id;
+        }
+    }
+
+
     protected $_changes;
-    protected function addChange($fieldName){
-        if(!is_array($this->_changes)){
+
+    protected function addChange($fieldName)
+    {
+        if (!is_array($this->_changes)) {
             $this->_changes = array();
         }
         $this->_changes[$fieldName] = 1;
         return $this;
     }
 
-    public function resetChanges(){
+    public function resetChanges()
+    {
         $this->_changes = array();
     }
 
@@ -48,23 +66,22 @@ abstract class BaseEntity
     }
 
 
-
     /**
      * Convert to an object
      *
      * @return \stdClass
      */
-    public function toArray($changedOnly=false)
+    public function toArray($changedOnly = false)
     {
         $vars = get_object_vars($this);
         $object = array();
 
-        if(!is_array($this->_changes)){
+        if (!is_array($this->_changes)) {
             $this->_changes = array();
         }
 
         foreach ($vars as $k => $v) {
-            if ( $v !== null && (!$changedOnly || array_key_exists($k, $this->_changes))) {
+            if ($v !== null && (!$changedOnly || array_key_exists($k, $this->_changes))) {
                 if (is_array($v)) {
                     $subV = array();
 
@@ -103,24 +120,24 @@ abstract class BaseEntity
 
                 $info = $this->parsePropertyDocComment($meta->getDocComment());
 
-                $type =$info['type'];
+                $type = $info['type'];
 
-                if(strtolower($type) == "array" && $elementType = $info['array_element']){
-                    if(class_exists($elementType)){
+                if (strtolower($type) == "array" && $elementType = $info['array_element']) {
+                    if (class_exists($elementType)) {
                         $children = array();
-                        foreach($v as $subV){
+                        foreach ($v as $subV) {
                             $newElement = new $elementType();
                             $children[] = $newElement->fromArray($subV);
                         }
                         $this->$k = $children;
 
-                    }else{
-                        throw new \Exception('@element Class Not Found:'.$elementType);
+                    } else {
+                        throw new \Exception('@element Class Not Found:' . $elementType);
                     }
 
-                }else if(class_exists($type)){
+                } else if (class_exists($type)) {
                     $this->$k = (new $type())->fromArray($v);
-                }else{
+                } else {
                     $this->$k = $v;
                 }
 
@@ -138,10 +155,11 @@ abstract class BaseEntity
      * @param $comment
      * @return array
      */
-    protected function parsePropertyDocComment($comment){
+    protected function parsePropertyDocComment($comment)
+    {
         $return = array();
-        $return['type'] = preg_match('~@var (\S+)~m', $comment, $matches) ? $matches[1] :null;
-        $return['array_element'] = preg_match('~@element (\S+)~m', $comment, $matches) ? $matches[1] :null;
+        $return['type'] = preg_match('~@var (\S+)~m', $comment, $matches) ? $matches[1] : null;
+        $return['array_element'] = preg_match('~@element (\S+)~m', $comment, $matches) ? $matches[1] : null;
 
         return $return;
 
@@ -154,9 +172,10 @@ abstract class BaseEntity
      * @param $enum
      * @throws \Exception
      */
-    protected function checkEnumField($value, $enum){
-        if(!in_array($enum, $value)){
-            throw new \Exception("Invalid value ($value) given, valid values are:".implode(', ',$enum));
+    protected function checkEnumField($value, $enum)
+    {
+        if (!in_array($enum, $value)) {
+            throw new \Exception("Invalid value ($value) given, valid values are:" . implode(', ', $enum));
         }
     }
 
@@ -165,8 +184,9 @@ abstract class BaseEntity
      *
      * @throws \Exception
      */
-    protected function checkNotUpdatableField(){
-        if(property_exists($this, 'id') && $this->id > 0){
+    protected function checkNotUpdatableField()
+    {
+        if (property_exists($this, 'id') && $this->id > 0) {
             throw new \Exception("Field not updatable");
         }
     }
@@ -175,9 +195,10 @@ abstract class BaseEntity
      * Checks if this entity is creatable
      * @throws \Exception
      */
-    public  function checkCreatable(){
-        if(property_exists($this, 'id') && $this->id > 0){
-            throw new \Exception(get_class($this)." has ID:".$this->id()." thus not creatable.");
+    public function checkCreatable()
+    {
+        if (property_exists($this, 'id') && $this->id > 0) {
+            throw new \Exception(get_class($this) . " has ID:" . $this->id() . " thus not creatable.");
         }
 
     }
@@ -187,9 +208,10 @@ abstract class BaseEntity
      * @param $fields
      * @throws \Exception
      */
-    protected function checkFieldsSet($fields){
-        foreach($fields as $field){
-            if(property_exists($this, $field) && $this->$field === null){
+    protected function checkFieldsSet($fields)
+    {
+        foreach ($fields as $field) {
+            if (property_exists($this, $field) && $this->$field === null) {
                 throw new \Exception("'$field' is required");
             }
 
@@ -199,31 +221,49 @@ abstract class BaseEntity
 
 
     /**
-     * @return bool
+     * @return TicketAudit
      */
-    public function udpate(){
-        if($this->getManagingCleint()){
-           $result =  $this->getManagingCleint()->save($this);
-            if($result){
+    public function udpate()
+    {
+        if ($this->getManagingCleint()) {
+            /**
+             * @var \Dlin\Zendesk\Result\ChangeResult $result
+             */
+            $result = $this->getManagingCleint()->save($this);
+            if ($result) {
                 $this->resetChanges();
+                $this->fromArray($result->getItem()->toArray());
+                return $result->getAudit();
             }
-            return $result;
+        } else {
+
+            throw new \Exception(get_class($this) . ' can not be updated without a managing client');
         }
-        throw new \Exception( get_class($this).' can not be updated without a managing client');
+        return null;
     }
 
 
-
-    public function delete(){
-        if($this->getManagingCleint()){
-            $result =   $this->getManagingCleint()->delete($this);
-            if($result){
+    /**
+     * @return mixed
+     * @throws \Exception
+     */
+    public function delete()
+    {
+        if ($this->getManagingCleint()) {
+            /**
+             * @var \Dlin\Zendesk\Result\ChangeResult $result
+             */
+            $result = $this->getManagingCleint()->delete($this);
+            if ($result) {
                 $this->id = 0;
                 $this->resetChanges();
+                return $result->getAudit();
             }
-            return $result;
+
+        } else {
+            throw new \Exception(get_class($this) . ' can not be deleted without a managing client');
         }
-        throw new \Exception( get_class($this).' can not be deleted without a managing client');
+        return null;
     }
 
 

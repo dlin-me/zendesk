@@ -3,7 +3,7 @@
     "description":"PHP Library for Zendesk API",
     "keywords":["zendesk", "api", "webservice"],
     "license":"MIT",
-    "version": "0.0.2",
+
     "authors":[
         {
             "name":"David Lin",

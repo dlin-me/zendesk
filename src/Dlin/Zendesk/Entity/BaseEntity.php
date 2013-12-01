@@ -47,14 +47,14 @@ abstract class BaseEntity
     /**
      * @var \Dlin\Zendesk\Client\BaseClient
      */
-    protected $managingCleint;
+    private  $_managingCleint;
 
     /**
      * @param \Dlin\Zendesk\Client\BaseClient $managingCleint
      */
     public function setManagingClient($managingCleint)
     {
-        $this->managingCleint = $managingCleint;
+        $this->_managingCleint = $managingCleint;
     }
 
     /**
@@ -62,7 +62,7 @@ abstract class BaseEntity
      */
     public function getManagingCleint()
     {
-        return $this->managingCleint;
+        return $this->_managingCleint;
     }
 
 
@@ -81,7 +81,7 @@ abstract class BaseEntity
         }
 
         foreach ($vars as $k => $v) {
-            if ($v !== null && (!$changedOnly || array_key_exists($k, $this->_changes))) {
+            if (strpos($k, '_') !== 0 && $v !== null && (!$changedOnly || array_key_exists($k, $this->_changes))) {
                 if (is_array($v)) {
                     $subV = array();
 

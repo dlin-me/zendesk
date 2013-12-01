@@ -59,7 +59,7 @@ php ./composer.phar install
 
 
 ## 3. Using the low level API client
-This library, comes with a configured Guzzel client for communicating with Zendesk's webservice. You don't need to learn about Guzzel to use this client object. 
+This library, comes with a configured Guzzel client for communicating with Zendesk's webservice. You don't need to learn about Guzzel to use this client object.
 
 Using the client means you are working with low level JSON format raw data. You are able to work with all resource exposed by Zendesk's API. However, one will find himself frequently needing to look up Zendesk's documentation for the right resource URL endpoints and data format.
 
@@ -71,19 +71,19 @@ Using the client means you are working with low level JSON format raw data. You 
 
 // You will need to include this autoload script manually
 // if you don't have any autoloader setup.
-include "../path/to/vendor/autoload.php"; 
+include "../path/to/vendor/autoload.php";
 
-// one needs to declear the namespace for each class used 
+// one needs to declear the namespace for each class used
 use Dlin\Zendesk\ZendeskApi
 
 //Your Zendesk account email
 $accountEmail = 'account.email@example.com';
 
 //Your zendesk api token
-$apiToken = 'c6EFbHZ7YsdggbIMSvOqiq3HduO'; 
+$apiToken = 'c6EFbHZ7YsdggbIMSvOqiq3HduO';
 
 //replace with your subdomain with zendesk
-$apiUrl = 'https://[your-subdomain].zendesk.com/api/v2/'; 
+$apiUrl = 'https://[your-subdomain].zendesk.com/api/v2/';
 
 
 //Instantiate the client class for later use
@@ -150,7 +150,7 @@ $newTicket = '{"ticket":{"subject":"My printer is on fire!", "comment": { "body"
 $endPoint = 'tickets.json';
 
 //No need
-$extraHttpHeader = null; 
+$extraHttpHeader = null;
 
 //Sent the request
 $response = $api->post($endPoint, $extraHttpHeader, $ticket)->sent()->json();
@@ -184,13 +184,13 @@ Updating resource works very similar to creating resource. The only different is
 ```
 $updateData = '{"ticket":{"status":"solved",   \
        "comment":{"public":true, "body": "Thanks, this is now solved!"}}}';
-       
+
 
 //WebService URL endpoint
 $endPoint = 'tickets/123.json'; //e.g. ticket id 123
 
 //No need
-$extraHttpHeader = null; 
+$extraHttpHeader = null;
 
 //Sent the request
 $response = $api->put($endPoint, $extraHttpHeader, $ticket)->sent()->json();
@@ -220,7 +220,7 @@ To delete a resource, use DELETE method
 ```
 
 //Specify the endpoint with the ID of the resource to be deleted
-$endPoint = "tickets/{id}.json"; 
+$endPoint = "tickets/{id}.json";
 
 //delete
 $response = $this->api->delete($end_point)->send();
@@ -250,9 +250,9 @@ Resource clients are wrapper cleasses of the abovementioned low level client tha
 
 // You will need to include this autoload script manually
 // if you don't have any autoloader setup.
-include "../path/to/vendor/autoload.php"; 
+include "../path/to/vendor/autoload.php";
 
-// one needs to declear the namespace for each class used 
+// one needs to declear the namespace for each class used
 use Dlin\Zendesk\ZendeskApi
 use Dlin\Zendesk\Client\TicketClient;
 
@@ -260,10 +260,10 @@ use Dlin\Zendesk\Client\TicketClient;
 $accountEmail = 'account.email@example.com';
 
 //Your zendesk api token
-$apiToken = 'c6EFbHZ7YsdggbIMSvOqiq3HduO'; 
+$apiToken = 'c6EFbHZ7YsdggbIMSvOqiq3HduO';
 
 //replace with your subdomain with zendesk
-$apiUrl = 'https://[your-subdomain].zendesk.com/api/v2/'; 
+$apiUrl = 'https://[your-subdomain].zendesk.com/api/v2/';
 
 
 //Instantiate the client class for later use
@@ -277,7 +277,7 @@ $ticketClient = new TicketClient($api);
 
 #####2. Quering Tickets
 
-When quering tickets, the expected return can either be a single ticket or a collection of tickets.  
+When quering tickets, the expected return can either be a single ticket or a collection of tickets.
 
 When quering for a single ticket, the returned value is of type Dlin\Zendesk\Entity\Ticket is the target resource exists, null otherwise.
 
@@ -312,8 +312,8 @@ echo $paginatedResult->getPerPage(); //100 (default)
 /* =================================
  * Other supported quering methods
  * ================================= */
- 
- 
+
+
 //Get recent tickets
 $paginatedResult=$ticketClient->getRecent();
 
@@ -323,7 +323,7 @@ $paginatedResult = $ticketClient->getOrganizationTickets(34);
 //Get tickets requested by a given user (e.g. id:234)
 $paginatedResult = $ticketClient->getUserRequestedTickets(234);
 
-//Get CCD tickets by a given user (e.g. id:234) 
+//Get CCD tickets by a given user (e.g. id:234)
 $paginatedResult = $ticketClient->getUserCcdTickets(234);
 
 
@@ -386,7 +386,7 @@ foreach($paginatedResult as $ticket){
 	...
 }
 
- 
+
 ```
 
 
@@ -396,7 +396,7 @@ To search ticket, one must provide an object of type \Dlin\Zendesk\Search\Ticket
 
 ```
 $filter = new TicketFilter();
-$filter->setSubject('Test Ticket Subject'); 
+$filter->setSubject('Test Ticket Subject');
 
 $searchResult = $ticketClient->search($filter);
 
@@ -405,12 +405,12 @@ $searchResult = $ticketClient->search($filter);
 Again the returning result is limited to 100 tickets. Fortunately, the $searchResult is of type \Dlin\Zendesk\Result\PaginatedResult. One can use the getCoun, getItems and getNextResult methods to access all matching tickets.
 
 
-Searching with the Zendesk API is a big topic. It is recommended to do [some reading](https://support.zendesk.com/entries/20239737). In particular, if one wants to find exact match of multiple words, the words need be be double quoted. 
+Searching with the Zendesk API is a big topic. It is recommended to do [some reading](https://support.zendesk.com/entries/20239737). In particular, if one wants to find exact match of multiple words, the words need be be double quoted.
 
 ```
 $filter->setSubject('"My Subject"'); //the will do exact match against 'My Subject'
 ```
-By default, the matching is a ':' (equal) matching. For matching dates, numeric value and some status types, one can also use '>' and '<' for matching. 
+By default, the matching is a ':' (equal) matching. For matching dates, numeric value and some status types, one can also use '>' and '<' for matching.
 
 All the setter methods of the TicketFilter class accepts array values. This allows matching ranges:
 
@@ -441,19 +441,24 @@ $ticket->setComment($comment);
 $ticket->setSubject('Test Ticket Subject By David Lin 1');
 $ticket->setTags(array('test'));
 
-$result = $ticketClient->save($ticket); //more later for the $result
+//Optionally, you can specify a requester when creating ticket
+$requester = new TicketRequester();
+$requester->setName('Test Requester');
+$requester->setEmail('test@email.com);
+
+$result = $ticketClient->save($ticket, $requester); //more later for the $result
 
 ```
 
 
-The $result is an object of type Dlin\Zendesk\Result\ChangeResult allow access to the [Audit](http://developer.zendesk.com/documentation/rest_api/ticket_audits.html) object and the updated ticket. 
+The $result is an object of type Dlin\Zendesk\Result\ChangeResult allow access to the [Audit](http://developer.zendesk.com/documentation/rest_api/ticket_audits.html) object and the updated ticket.
 
 ```
 $savedTicket = $result->getItem();
 $audit = $result->getAudit();
 ```
 
-Note that the original ticket object will not be updated upon new ticket creation. It works as a template for new tickets only. You can call the **save** method again to create another ticket or ignore it afterward. 
+Note that the original ticket object will not be updated upon new ticket creation. It works as a template for new tickets only. You can call the **save** method again to create another ticket or ignore it afterward.
 
 
 
@@ -471,7 +476,7 @@ $result = $ticketClient->save($ticket);
 $ticket->save();
 
 ```
-When updating a ticket, the library only submit updated/modified fields to Zendesk's server since last update/creation. 
+When updating a ticket, the library only submit updated/modified fields to Zendesk's server since last update/creation.
 
 If a ticket is retrieved by the TicketClient object, it is said that it is 'managed' by the TicketClient and then you can call the **save** method on the Ticket object itself to update the ticket. In this case the $ticket object will be loaded with updated data (e.g. the lastUpdate timestamp ).The returned result of the Ticket::save() method is an instance of the Dlin\Zendesk\Entity\TicketAudit class providing data about an [Audit](http://developer.zendesk.com/documentation/rest_api/ticket_audits.html) resource.
 
@@ -492,7 +497,7 @@ $ticket->save();
 
 ```
 
-You can manually add a Ticket object to be managed by a TicketClient object using the **manage** method. 
+You can manually add a Ticket object to be managed by a TicketClient object using the **manage** method.
 
 
 #####5. Deleting Tickets
@@ -500,7 +505,7 @@ You can manually add a Ticket object to be managed by a TicketClient object usin
 The TicketClient class provide two methods for deleting tickets.
 
 ```
-//delete one ticket 
+//delete one ticket
 $ticketClient->deleteTicket(new Ticket(123));
 
 //delete multiple tickets
@@ -558,7 +563,7 @@ To help avoid typos and make it easy to lookup values, constants grouped by clas
 * TicketPriority
 * TicketStatus
 * TicketType
-* ... 
+* ...
 
 Enumeration classes extends the *EnumBase* class which provides two useful static methods *keys()* and *values()*:
 

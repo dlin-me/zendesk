@@ -69,9 +69,9 @@ abstract class BaseEntity
     /**
      * Convert to an object
      *
-     * @return \stdClass
+     * @return array
      */
-    public function toArray($changedOnly = false)
+    public function toArray($changedOnly = false, $extraData = null)
     {
         $vars = get_object_vars($this);
         $object = array();
@@ -80,8 +80,12 @@ abstract class BaseEntity
             $this->_changes = array();
         }
 
+        if(is_array($extraData)){
+            $vars = array_merge($vars, $extraData);
+        }
+
         foreach ($vars as $k => $v) {
-            if (strpos($k, '_') !== 0 && $v !== null && (!$changedOnly || array_key_exists($k, $this->_changes))) {
+            if (strpos($k, '_') !== 0 && $v !== null && (!$changedOnly || array_key_exists($k, $this->_changes) || array_key_exists($k, $extraData) )) {
                 if (is_array($v)) {
                     $subV = array();
 
@@ -100,6 +104,8 @@ abstract class BaseEntity
                 }
             }
         }
+
+
 
         return $object;
     }
@@ -223,13 +229,13 @@ abstract class BaseEntity
     /**
      * @return TicketAudit
      */
-    public function udpate()
+    public function udpate($extraData=null)
     {
         if ($this->getManagingCleint()) {
             /**
              * @var \Dlin\Zendesk\Result\ChangeResult $result
              */
-            $result = $this->getManagingCleint()->save($this);
+            $result = $this->getManagingCleint()->save($this, $extraData);
             if ($result) {
                 $this->resetChanges();
                 $this->fromArray($result->getItem()->toArray());

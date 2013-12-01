@@ -162,7 +162,7 @@ abstract class BaseClient
      * @param $endPoint
      * @return ChangeResult|null
      */
-    public function saveEntity(BaseEntity $entity, $endPoint='')
+    public function saveEntity(BaseEntity $entity, $endPoint='', $extraData=null)
     {
         $end_point = strtolower($endPoint);
 
@@ -174,8 +174,12 @@ abstract class BaseClient
         $baseName = strtolower(end($className));
 
         $method = $entity->getId() ? 'put':'post';
+        if($method == 'post'){
+            $entity->checkCreatable();
+        }
 
-        $changes = $entity->toArray(true);
+
+        $changes = $entity->toArray(true, $extraData);
         if(empty($changes)){
             return null;
         }

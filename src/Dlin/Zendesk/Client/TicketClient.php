@@ -11,6 +11,7 @@ namespace Dlin\Zendesk\Client;
 
 
 use Dlin\Zendesk\Entity\Ticket;
+use Dlin\Zendesk\Entity\TicketRequester;
 use Dlin\Zendesk\Search\TicketFilter;
 
 class TicketClient extends BaseClient
@@ -125,14 +126,20 @@ class TicketClient extends BaseClient
     }
 
 
-
     /**
      * @param Ticket $ticket
+     * @param TicketRequester $requester
      * @return \Dlin\Zendesk\Result\ChangeResult|null
      */
-    public function save(Ticket $ticket){
-        return parent::saveEntity($ticket, 'tickets.json');
+    public function save(Ticket $ticket, TicketRequester $requester=null){
+
+        $extraData = $requester ? array('requester'=>$requester) : null;
+
+        return parent::saveEntity($ticket, 'tickets.json', $extraData);
     }
+
+
+
 
     /**
      *

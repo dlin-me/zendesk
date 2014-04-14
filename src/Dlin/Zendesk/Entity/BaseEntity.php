@@ -142,7 +142,8 @@ abstract class BaseEntity
                     }
 
                 } else if (class_exists($type)) {
-                    $this->$k = (new $type())->fromArray($v);
+                    $typeObject = new $type();
+                    $this->$k = $typeObject->fromArray($v);
                 } else {
                     $this->$k = $v;
                 }

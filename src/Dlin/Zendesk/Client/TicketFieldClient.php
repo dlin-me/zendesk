@@ -3,16 +3,13 @@
  *
  * User: matks
  * Date: 13/08/2014
- * Time: 11:31 AM
+ * Time: 12:25 AM
  *
  */
 
 namespace Dlin\Zendesk\Client;
 
-
 use Dlin\Zendesk\Entity\Ticket;
-use Dlin\Zendesk\Entity\TicketRequester;
-use Dlin\Zendesk\Search\TicketFilter;
 
 class TicketFieldClient extends BaseClient
 {
@@ -41,8 +38,8 @@ class TicketFieldClient extends BaseClient
     /**
      * List tickets fields
      *
-     * @param int $page
-     * @param int $per_page
+     * @param  int                                  $page
+     * @param  int                                  $per_page
      * @return \Dlin\Zendesk\Result\PaginatedResult
      */
     public function getAll($page = 1, $per_page = 100)

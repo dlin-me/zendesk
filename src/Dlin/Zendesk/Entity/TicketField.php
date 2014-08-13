@@ -3,12 +3,11 @@
  *
  * User: matks
  * Date: 13/08/2014
- * Time: 11:09 AM
+ * Time: 12:25 PM
  *
  */
 
 namespace Dlin\Zendesk\Entity;
-
 
 class TicketField extends BaseEntity
 {
@@ -150,8 +149,189 @@ class TicketField extends BaseEntity
     protected $custom_field_options;
 
     /**
-     * @var string
+     * @var boolean
      * @readonly
      */
     protected $removable;
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return intval($this->id);
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->url;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRawTitle()
+    {
+        return $this->raw_title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRawDescription()
+    {
+        return $this->raw_description;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getPosition()
+    {
+        return $this->position;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getActive()
+    {
+        return $this->active;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getRequired()
+    {
+        return $this->required;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getCollapsedForAgents()
+    {
+        return $this->collapsed_for_agents;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRegexpForValidation()
+    {
+        return $this->regexp_for_validation;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitleInPortal()
+    {
+        return $this->title_in_portal;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRawTitleInPortal()
+    {
+        return $this->raw_title_in_portal;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getVisibleInPortal()
+    {
+        return $this->visible_in_portal;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getEditableInPortal()
+    {
+        return $this->editable_in_portal;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getRequiredInPortal()
+    {
+        return $this->required_in_portal;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTag()
+    {
+        return $this->tag;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updated_at;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSystemFieldOptions()
+    {
+        return $this->system_field_options;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCustomFieldOptions()
+    {
+        return $this->custom_field_options;
+    }
+
+    public function getRemovable()
+    {
+        return $this->removable;
+    }
 }

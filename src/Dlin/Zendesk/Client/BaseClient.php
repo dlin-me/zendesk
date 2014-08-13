@@ -145,11 +145,16 @@ abstract class BaseClient
         $className = explode('\\', $type);
         $baseName = strtolower(end($className));
 
+        $alternativeName = $this->uncamelize(end($className));
 
         if ($result && isset($result[$baseName])) {
             $t = new $type();
             $t->setManagingClient($this);
             return $t->fromArray($result[$baseName]);
+        } else if ($result && isset($result[$alternativeName])) {
+            $t = new $type();
+            $t->setManagingClient($this);
+            return $t->fromArray($result[$alternativeName]);      
         }
         return null;
 
@@ -286,10 +291,17 @@ abstract class BaseClient
         return $response;
     }
 
-
-
-
-
-
-
+    /**
+     * Convert CamelCase string into underscore-separated string
+     *
+     * @param string
+     * @return string
+     *
+     * @example TicketField will be converted into ticket_field
+     */
+    private function uncamelize($input)
+    {
+        $result = ltrim(strtolower(preg_replace('/[A-Z]/', '_$0', $input)), '_');
+        return $result;
+    }
 }

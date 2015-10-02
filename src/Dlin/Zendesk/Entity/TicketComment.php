@@ -66,7 +66,7 @@ class TicketComment extends BaseEntity
      * The attachments on this comment as Attachment objects
      * @var array
      * @readonly
-     * @element \Dlin\Zendesk\Entity\Attachement
+     * @element \Dlin\Zendesk\Entity\Attachment
      */
     protected $attachments;
 
